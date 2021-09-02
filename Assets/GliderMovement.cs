@@ -11,12 +11,11 @@ public class GliderMovement : MonoBehaviour
     float yaw;
     float roll;
     float pitchChangeRate = 20f;
-    float yawChangeRate = 20f;
     float rollChangeRate = 30f;
     float horizontalInput;
     float maxRollAngle = 45;
-    float rollResetRate = 0.98f;
-    float yawResetRate = 0.95f;
+    float rollToYaw = 0.01f;
+    float rollResetModifier = 1.3f;
 
     private void OnEnable()
     {
@@ -43,16 +42,30 @@ public class GliderMovement : MonoBehaviour
         pitch = Mathf.Clamp(pitch, -30, 30);
 
         horizontalInput = Input.GetAxisRaw("Horizontal");
-        yaw += horizontalInput * Time.deltaTime * yawChangeRate;
 
         if(horizontalInput == 0)
         {
             //make roll tend towards 0 when nothing is input
-            roll = roll * rollResetRate;
-            if(Mathf.Abs(roll) > 10f)
+            if(Mathf.Abs(roll) <= 0.1)
             {
-                yaw += Mathf.Sign(roll) * Time.deltaTime * 20f;
-                print(roll);
+                roll = 0f;
+            }
+            if(Mathf.Sign(roll) == -1)
+            {
+                roll += rollChangeRate * Time.deltaTime * rollResetModifier;
+                if(Mathf.Sign(roll) == 1)
+                {
+                    roll = 0f;
+                }
+
+            }
+            else
+            {
+                roll -= rollChangeRate * Time.deltaTime * rollResetModifier;
+                if (Mathf.Sign(roll) == -1)
+                {
+                    roll = 0f;
+                }
             }
         }
         else
@@ -60,6 +73,8 @@ public class GliderMovement : MonoBehaviour
             roll += horizontalInput * Time.deltaTime * rollChangeRate;
             roll = Mathf.Clamp(roll, -maxRollAngle, maxRollAngle);
         }
+
+        yaw += roll * rollToYaw;
 
 
         transform.localEulerAngles = new Vector3(pitch, yaw, 0);
