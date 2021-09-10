@@ -16,6 +16,10 @@ public class GliderMovement : MonoBehaviour
     float maxRollAngle = 45;
     float rollToYaw = 0.01f;
     float rollResetModifier = 1.3f;
+    float minSpeed = 8f;
+    float gravity = 3f;
+    float terminalVelocity = 50f;
+    
 
     private void OnEnable()
     {
@@ -34,7 +38,8 @@ public class GliderMovement : MonoBehaviour
         
     }
 
-    //make it so yaw is dependent on roll, not the other way around (thats how it is currently)
+    //make it so gravity is dependent on angle and horizontal velocity(not true velocity that has vertical component)
+    //gravity opposing lift force. Lift force decreases as angle moves away from 0
 
     private void FixedUpdate()
     {
@@ -45,7 +50,6 @@ public class GliderMovement : MonoBehaviour
 
         if(horizontalInput == 0)
         {
-            //make roll tend towards 0 when nothing is input
             if(Mathf.Abs(roll) <= 0.1)
             {
                 roll = 0f;
@@ -74,12 +78,26 @@ public class GliderMovement : MonoBehaviour
             roll = Mathf.Clamp(roll, -maxRollAngle, maxRollAngle);
         }
 
+        //print(transform.InverseTransformDirection(rb.velocity));
+
+        Debug.DrawRay(transform.position, transform.forward * 10, Color.red);
+        
+
         yaw += roll * rollToYaw;
 
 
         transform.localEulerAngles = new Vector3(pitch, yaw, 0);
         gliderBody.localEulerAngles = new Vector3(gliderBody.localEulerAngles.x, gliderBody.localEulerAngles.y, -roll);
-        rb.velocity = transform.TransformDirection(new Vector3(0, 0, rb.velocity.magnitude));
+        //rb.velocity = transform.TransformDirection(new Vector3(0, 0, rb.velocity.magnitude));
+        if (rb.velocity.z <= minSpeed) //checks if glider is stalling out from going to slow //CHange so it is sqrt(z^2 *x^2)
+        {
+            rb.velocity -= new Vector3(0, gravity * Time.deltaTime, 0); //applies a downward force if stalling out
+            rb.velocity = new Vector3(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -terminalVelocity, terminalVelocity), rb.velocity.z); //clamps the y velocity so you can't infinitely accelerate downwards by stalling. May have to add same thing for just going downwards
+        }
+        else
+        {
+            rb.velocity = transform.TransformDirection(new Vector3(0, 0, rb.velocity.magnitude));
+        }
     }
 
     float Lift()
