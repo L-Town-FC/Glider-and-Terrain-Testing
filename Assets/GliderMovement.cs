@@ -17,7 +17,7 @@ public class GliderMovement : MonoBehaviour
     float rollToYaw = 0.01f;
     float rollResetModifier = 1.3f;
     float minSpeed = 8f;
-    float gravity = 3f;
+    float gravity = -3f;
     float terminalVelocity = 50f;
     
 
@@ -81,6 +81,7 @@ public class GliderMovement : MonoBehaviour
         //print(transform.InverseTransformDirection(rb.velocity));
 
         Debug.DrawRay(transform.position, transform.forward * 10, Color.red);
+        Debug.DrawRay(transform.position, rb.velocity * 10, Color.blue);
         
 
         yaw += roll * rollToYaw;
@@ -89,14 +90,34 @@ public class GliderMovement : MonoBehaviour
         transform.localEulerAngles = new Vector3(pitch, yaw, 0);
         gliderBody.localEulerAngles = new Vector3(gliderBody.localEulerAngles.x, gliderBody.localEulerAngles.y, -roll);
         //rb.velocity = transform.TransformDirection(new Vector3(0, 0, rb.velocity.magnitude));
-        if (rb.velocity.z <= minSpeed) //checks if glider is stalling out from going to slow //CHange so it is sqrt(z^2 *x^2)
+        if (Mathf.Sqrt(rb.velocity.z * rb.velocity.z + rb.velocity.x * rb.velocity.x) <= minSpeed) //checks if glider is stalling out from going to slow //Change so it is sqrt(z^2 *x^2)
         {
-            rb.velocity -= new Vector3(0, gravity * Time.deltaTime, 0); //applies a downward force if stalling out
+            if(pitch > 0)
+            {
+                rb.velocity -= transform.TransformDirection(new Vector3(0, Mathf.Sin(pitch) * gravity, Mathf.Cos(pitch) * gravity)) * 0.2f;
+            }
+            else
+            {
+                rb.velocity += new Vector3(0, gravity * Time.deltaTime, 0); //applies a downward force if stalling out
+                //print(rb.velocity);
+            }
             rb.velocity = new Vector3(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -terminalVelocity, terminalVelocity), rb.velocity.z); //clamps the y velocity so you can't infinitely accelerate downwards by stalling. May have to add same thing for just going downwards
+
         }
         else
         {
+           
             rb.velocity = transform.TransformDirection(new Vector3(0, 0, rb.velocity.magnitude));
+            //rb.velocity = gliderBody.forward * rb.velocity.magnitude;
+        }
+
+
+        //Shows when the direction the glider is facing is not the same as its velocity vector. Will have to slowly move change direction from current vecolity direction to glider forward. Possibly use Vector3.SmoothDamp
+        float test = Vector3.Dot(rb.velocity.normalized, gliderBody.forward.normalized);
+
+        if (test < 1 - 0.1f)
+        {
+            print(test);
         }
     }
 
