@@ -1,75 +1,92 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class GliderMovement : MonoBehaviour
 {
-    Rigidbody rb;
     Transform gliderBody;
-    Vector3 gliderRotation;
-    float pitch;
+
+    //Glider Rotations
+    float pitch; //units are degrees
     float yaw;
     float roll;
-    float pitchChangeRate = 20f;
-    float rollChangeRate = 30f;
+
     float horizontalInput;
-    float maxRollAngle = 45;
+    static float maxRollAngle = 45;
+    static float maxPitchAngle = 40;
+    static float maxSpeed = 100;
+
+    //Glider Rotation Rates
+    float pitchChangeRate = 0.5f * maxPitchAngle;
+    float rollChangeRate = 30f;
     float rollToYaw = 0.01f;
     float rollResetModifier = 1.3f;
-    float minSpeed = 8f;
-    float gravity = -3f;
-    float terminalVelocity = 50f;
+
     
+    float stallSpeed = 8f;
+    Vector3 gravity = new Vector3(0,-0.2f,0);
+    float terminalVelocity = 50f;
+    float horizontalVelocityMagnitude;
+    public Vector3 startingVelocity = new Vector3(0,0,50);
+    Vector3 velocity;
+    float drag = -0.01f;
 
     private void OnEnable()
     {
         gliderBody = transform.GetChild(0);
-        rb = GetComponent<Rigidbody>();
-        rb.velocity = new Vector3(0, 0, 50);
+        velocity = startingVelocity;
     }
 
-
-    // Start is called before the first frame update
-    void Start()
+    private void Update()
     {
-        pitch = gliderRotation.x;
-        yaw = gliderRotation.y;
-        roll = gliderRotation.z;
-        
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            velocity.z += 5f;
+        }
+
     }
 
-    //make it so gravity is dependent on angle and horizontal velocity(not true velocity that has vertical component)
-    //gravity opposing lift force. Lift force decreases as angle moves away from 0
+
 
     private void FixedUpdate()
     {
         pitch += Input.GetAxisRaw("Vertical") * Time.deltaTime * pitchChangeRate;
-        pitch = Mathf.Clamp(pitch, -30, 30);
+        pitch = Mathf.Clamp(pitch, -maxPitchAngle, maxPitchAngle);
 
         horizontalInput = Input.GetAxisRaw("Horizontal");
 
-        if(horizontalInput == 0)
+        //Resets glider roll when no input is applied
+        RollReset();
+
+        //Sets glider rotations
+        GliderRotations();
+
+        //Setting Velocity of Glider and Applying Movement
+        SettingVelocity();
+
+        //Shows the direciton the glider is facing and the direction the glider is moving
+        Debug.DrawRay(transform.position, transform.forward * 10, Color.red);
+        Debug.DrawRay(transform.position, velocity.normalized * 10, Color.blue);
+
+    }
+
+    void GliderRotations()
+    {
+        yaw += roll * rollToYaw; //turns side to side based on amount of roll applied
+        transform.localEulerAngles = new Vector3(pitch, yaw, 0);
+        gliderBody.localEulerAngles = new Vector3(gliderBody.localEulerAngles.x, gliderBody.localEulerAngles.y, -roll);
+    }
+
+    void RollReset()
+    {
+        if (horizontalInput == 0) //Sets roll to zero if close to zero and no input is applied. Otherwise it applies the input
         {
-            if(Mathf.Abs(roll) <= 0.1)
+            roll -= rollChangeRate * Mathf.Sign(roll) * rollResetModifier * Time.deltaTime;
+
+            if (Mathf.Abs(roll) < 0.8f)
             {
                 roll = 0f;
-            }
-            if(Mathf.Sign(roll) == -1)
-            {
-                roll += rollChangeRate * Time.deltaTime * rollResetModifier;
-                if(Mathf.Sign(roll) == 1)
-                {
-                    roll = 0f;
-                }
-
-            }
-            else
-            {
-                roll -= rollChangeRate * Time.deltaTime * rollResetModifier;
-                if (Mathf.Sign(roll) == -1)
-                {
-                    roll = 0f;
-                }
             }
         }
         else
@@ -77,54 +94,14 @@ public class GliderMovement : MonoBehaviour
             roll += horizontalInput * Time.deltaTime * rollChangeRate;
             roll = Mathf.Clamp(roll, -maxRollAngle, maxRollAngle);
         }
-
-        //print(transform.InverseTransformDirection(rb.velocity));
-
-        Debug.DrawRay(transform.position, transform.forward * 10, Color.red);
-        Debug.DrawRay(transform.position, rb.velocity * 10, Color.blue);
-        
-
-        yaw += roll * rollToYaw;
-
-
-        transform.localEulerAngles = new Vector3(pitch, yaw, 0);
-        gliderBody.localEulerAngles = new Vector3(gliderBody.localEulerAngles.x, gliderBody.localEulerAngles.y, -roll);
-        //rb.velocity = transform.TransformDirection(new Vector3(0, 0, rb.velocity.magnitude));
-        if (Mathf.Sqrt(rb.velocity.z * rb.velocity.z + rb.velocity.x * rb.velocity.x) <= minSpeed) //checks if glider is stalling out from going to slow //Change so it is sqrt(z^2 *x^2)
-        {
-            if(pitch > 0)
-            {
-                rb.velocity -= transform.TransformDirection(new Vector3(0, Mathf.Sin(pitch) * gravity, Mathf.Cos(pitch) * gravity)) * 0.2f;
-            }
-            else
-            {
-                rb.velocity += new Vector3(0, gravity * Time.deltaTime, 0); //applies a downward force if stalling out
-                //print(rb.velocity);
-            }
-            rb.velocity = new Vector3(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -terminalVelocity, terminalVelocity), rb.velocity.z); //clamps the y velocity so you can't infinitely accelerate downwards by stalling. May have to add same thing for just going downwards
-
-        }
-        else
-        {
-           
-            rb.velocity = transform.TransformDirection(new Vector3(0, 0, rb.velocity.magnitude));
-            //rb.velocity = gliderBody.forward * rb.velocity.magnitude;
-        }
-
-
-        //Shows when the direction the glider is facing is not the same as its velocity vector. Will have to slowly move change direction from current vecolity direction to glider forward. Possibly use Vector3.SmoothDamp
-        float test = Vector3.Dot(rb.velocity.normalized, gliderBody.forward.normalized);
-
-        if (test < 1 - 0.1f)
-        {
-            print(test);
-        }
     }
 
-    float Lift()
+    void SettingVelocity()
     {
-        float liftForce = 0;
+        Vector3 direction;
 
-        return liftForce;
+        velocity = transform.forward * (Mathf.Clamp(velocity.magnitude + drag + Math.Sign(pitch) * Mathf.Sin(Mathf.Abs(pitch) * Mathf.Deg2Rad) * gravity.magnitude, 0, maxSpeed));
+        transform.Translate(transform.InverseTransformDirection(velocity) * Time.fixedDeltaTime);
+        print(velocity);
     }
 }
