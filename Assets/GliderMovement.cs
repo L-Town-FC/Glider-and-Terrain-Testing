@@ -18,19 +18,23 @@ public class GliderMovement : MonoBehaviour
     static float maxSpeed = 100;
 
     //Glider Rotation Rates
-    float pitchChangeRate = 0.5f * maxPitchAngle;
-    float rollChangeRate = 30f;
+    float pitchChangeRate = 0.75f * maxPitchAngle;
+    float rollChangeRate = 35f;
     float rollToYaw = 0.01f;
     float rollResetModifier = 1.3f;
 
     
-    float stallSpeed = 8f;
-    Vector3 gravity = new Vector3(0,-0.2f,0);
-    float terminalVelocity = 50f;
-    float horizontalVelocityMagnitude;
+    float stallSpeed = 6f;
     public Vector3 startingVelocity = new Vector3(0,0,50);
     Vector3 velocity;
-    float drag = -0.01f;
+    float drag = -0.005f;
+    Vector3 force;
+
+    float downForce;
+    float maxDownForce = 6f;
+    float downForceAccelerationRate = 8f;
+
+    bool isStalling = false;
 
     private void OnEnable()
     {
@@ -66,8 +70,7 @@ public class GliderMovement : MonoBehaviour
         SettingVelocity();
 
         //Shows the direciton the glider is facing and the direction the glider is moving
-        Debug.DrawRay(transform.position, transform.forward * 10, Color.red);
-        Debug.DrawRay(transform.position, velocity.normalized * 10, Color.blue);
+        Debug.DrawRay(transform.position, gliderBody.forward * 10, Color.red);
 
     }
 
@@ -98,10 +101,54 @@ public class GliderMovement : MonoBehaviour
 
     void SettingVelocity()
     {
-        Vector3 direction;
+        
+        StallingCheck();
+        GravityCheck();
 
-        velocity = transform.forward * (Mathf.Clamp(velocity.magnitude + drag + Math.Sign(pitch) * Mathf.Sin(Mathf.Abs(pitch) * Mathf.Deg2Rad) * gravity.magnitude, 0, maxSpeed));
-        transform.Translate(transform.InverseTransformDirection(velocity) * Time.fixedDeltaTime);
-        print(velocity);
+        velocity.z = Mathf.Clamp(velocity.z, 0.5f, 100);
+
+        transform.Translate(velocity * Time.fixedDeltaTime);
+    }
+
+    void StallingCheck()
+    {
+        //Checks if you are stalling and adjusts downward force to stimulate lack up lift on glider
+
+        if (Mathf.Cos(pitch * Mathf.Deg2Rad) * velocity.z < stallSpeed)
+        {
+            isStalling = true;
+            downForce += downForceAccelerationRate;
+        }
+        else
+        {
+            isStalling = false;
+            downForce -= downForceAccelerationRate;
+        }
+
+        downForce = Mathf.Clamp(downForce, 0, maxDownForce);
+        transform.Translate(Vector3.down * downForce * Time.deltaTime);
+
+
+        if (!isStalling)
+        {
+            velocity.z += drag;
+        }
+    }
+
+    void GravityCheck()
+    { 
+        //checks how the glider is angled and either increases or decreases speed based on if facing upward or downward
+        if (pitch > 0)
+        {
+            //print("down");
+            force.z = pitch / 100f;
+        }
+        else if (pitch < 0)
+        {
+            //print("up");
+            force.z = pitch / 100f;
+        }
+
+        velocity += force;
     }
 }
