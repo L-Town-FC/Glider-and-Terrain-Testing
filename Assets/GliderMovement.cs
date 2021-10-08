@@ -23,14 +23,14 @@ public class GliderMovement : MonoBehaviour
     float rollToYaw = 0.01f;
     float rollResetModifier = 1.3f;
 
-    
+
     float stallSpeed = 6f;
-    public Vector3 startingVelocity = new Vector3(0,0,50);
+    public Vector3 startingVelocity = new Vector3(0, 0, 50);
     Vector3 velocity;
     float drag = -0.005f;
     Vector3 force;
 
-    float downForce;
+    public float downForce;
     float maxDownForce = 6f;
     float downForceAccelerationRate = 8f;
 
@@ -49,7 +49,6 @@ public class GliderMovement : MonoBehaviour
             velocity.z += 5f;
         }
     }
-
 
 
     private void FixedUpdate()
@@ -100,7 +99,7 @@ public class GliderMovement : MonoBehaviour
 
     void SettingVelocity()
     {
-        
+
         StallingCheck();
         GravityCheck();
 
@@ -135,7 +134,7 @@ public class GliderMovement : MonoBehaviour
     }
 
     void GravityCheck()
-    { 
+    {
         //checks how the glider is angled and either increases or decreases speed based on if facing upward or downward
         if (pitch > 0)
         {
