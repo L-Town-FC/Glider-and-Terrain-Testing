@@ -48,7 +48,6 @@ public class GliderMovement : MonoBehaviour
         {
             velocity.z += 5f;
         }
-
     }
 
 
@@ -87,7 +86,7 @@ public class GliderMovement : MonoBehaviour
         {
             roll -= rollChangeRate * Mathf.Sign(roll) * rollResetModifier * Time.deltaTime;
 
-            if (Mathf.Abs(roll) < 0.8f)
+            if (Mathf.Abs(roll) < 1f)
             {
                 roll = 0f;
             }
