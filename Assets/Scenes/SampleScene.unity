@@ -137,7 +137,7 @@ GameObject:
   - component: {fileID: 390571032}
   m_Layer: 0
   m_Name: GliderBody
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -151,7 +151,7 @@ BoxCollider:
   m_GameObject: {fileID: 390571030}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -482,9 +482,10 @@ GameObject:
   - component: {fileID: 1628115658}
   - component: {fileID: 1628115657}
   - component: {fileID: 1628115659}
+  - component: {fileID: 1628115660}
   m_Layer: 0
   m_Name: Glider
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -546,7 +547,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startingVelocity: {x: 0, y: 0, z: 50}
-  downForce: 0
+  inUpdraft: 0
+--- !u!65 &1628115660
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1628115655}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &738352420163756451
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -601,6 +615,10 @@ PrefabInstance:
     - target: {fileID: 738352420653601843, guid: 96585528448c2844f9770fda12ede937, type: 3}
       propertyPath: m_Name
       value: Updraft
+      objectReference: {fileID: 0}
+    - target: {fileID: 8851189871001059737, guid: 96585528448c2844f9770fda12ede937, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 96585528448c2844f9770fda12ede937, type: 3}
