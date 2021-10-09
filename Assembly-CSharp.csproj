@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\GliderMovement.cs" />
+    <Compile Include="Assets\Updraft.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

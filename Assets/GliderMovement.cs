@@ -30,11 +30,17 @@ public class GliderMovement : MonoBehaviour
     float drag = -0.005f;
     Vector3 force;
 
-    public float downForce;
+    float downForce;
     float maxDownForce = 6f;
     float downForceAccelerationRate = 8f;
 
+    float upForce;
+    float maxUpForce = 10f;
+    float upForceAccelerationRate = 10f;
+
+
     bool isStalling = false;
+    public bool inUpdraft = false;
 
     private void OnEnable()
     {
@@ -53,7 +59,7 @@ public class GliderMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        pitch += Input.GetAxisRaw("Vertical") * Time.deltaTime * pitchChangeRate;
+        pitch += Input.GetAxisRaw("Vertical") * Time.fixedDeltaTime * pitchChangeRate;
         pitch = Mathf.Clamp(pitch, -maxPitchAngle, maxPitchAngle);
 
         horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -83,7 +89,7 @@ public class GliderMovement : MonoBehaviour
     {
         if (horizontalInput == 0) //Sets roll to zero if close to zero and no input is applied. Otherwise it applies the input
         {
-            roll -= rollChangeRate * Mathf.Sign(roll) * rollResetModifier * Time.deltaTime;
+            roll -= rollChangeRate * Mathf.Sign(roll) * rollResetModifier * Time.fixedDeltaTime;
 
             if (Mathf.Abs(roll) < 1f)
             {
@@ -92,14 +98,14 @@ public class GliderMovement : MonoBehaviour
         }
         else
         {
-            roll += horizontalInput * Time.deltaTime * rollChangeRate;
+            roll += horizontalInput * Time.fixedDeltaTime * rollChangeRate;
             roll = Mathf.Clamp(roll, -maxRollAngle, maxRollAngle);
         }
     }
 
     void SettingVelocity()
     {
-
+        UpdraftCheck();
         StallingCheck();
         GravityCheck();
 
@@ -124,7 +130,7 @@ public class GliderMovement : MonoBehaviour
         }
 
         downForce = Mathf.Clamp(downForce, 0, maxDownForce);
-        transform.Translate(Vector3.down * downForce * Time.deltaTime);
+        transform.Translate(Vector3.down * downForce * Time.fixedDeltaTime);
 
 
         if (!isStalling)
@@ -148,5 +154,23 @@ public class GliderMovement : MonoBehaviour
         }
 
         velocity += force;
+    }
+
+    void UpdraftCheck()
+    {
+        if(inUpdraft == true)
+        {
+            upForce += upForceAccelerationRate;
+        }
+        else
+        {
+            upForce -= upForceAccelerationRate;
+        }
+
+        upForce = Mathf.Clamp(upForce, 0, maxUpForce);
+        if((upForce * Time.fixedDeltaTime * Vector3.up).magnitude > 0.01f)
+        {
+            transform.Translate(upForce * Vector3.up * Time.fixedDeltaTime);
+        }
     }
 }

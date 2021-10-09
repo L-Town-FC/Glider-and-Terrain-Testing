@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 738352420653601841}
   - component: {fileID: 738352420653601842}
   - component: {fileID: 8851189871001059737}
+  - component: {fileID: 4460619660527088955}
   m_Layer: 0
   m_Name: Updraft
   m_TagString: Untagged
@@ -4820,3 +4821,15 @@ CapsuleCollider:
   m_Height: 70
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 35}
+--- !u!114 &4460619660527088955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738352420653601843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 858a628b8f9072e48a12633ec3343bf1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
