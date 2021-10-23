@@ -35,8 +35,8 @@ public class GliderMovement : MonoBehaviour
     float downForceAccelerationRate = 8f;
 
     float upForce;
-    float maxUpForce = 10f;
-    float upForceAccelerationRate = 10f;
+    float maxUpForce = 30f;
+    float upForceAccelerationRate = 15f;
 
 
     bool isStalling = false;
