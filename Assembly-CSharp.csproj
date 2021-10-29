@@ -57,8 +57,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Updraft.cs" />
-    <Compile Include="Assets\GliderMovement.cs" />
     <Compile Include="Assets\BoostSpawner.cs" />
+    <Compile Include="Assets\GliderMovement.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
