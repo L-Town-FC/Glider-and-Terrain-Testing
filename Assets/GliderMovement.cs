@@ -13,15 +13,15 @@ public class GliderMovement : MonoBehaviour
     float roll;
 
     float horizontalInput;
-    static float maxRollAngle = 45;
+    static float maxRollAngle = 60;
     static float maxPitchAngle = 40;
     static float maxSpeed = 100;
 
     //Glider Rotation Rates
-    float pitchChangeRate = 0.75f * maxPitchAngle;
-    float rollChangeRate = 35f;
+    float pitchChangeRate = 1f * maxPitchAngle;
+    float rollChangeRate = 60f;
     float rollToYaw = 0.01f;
-    float rollResetModifier = 1.3f;
+    float rollResetModifier = 1.5f;
 
 
     float stallSpeed = 6f;
@@ -91,7 +91,7 @@ public class GliderMovement : MonoBehaviour
         {
             roll -= rollChangeRate * Mathf.Sign(roll) * rollResetModifier * Time.fixedDeltaTime;
 
-            if (Mathf.Abs(roll) < 1f)
+            if (Mathf.Abs(roll) < 2f)
             {
                 roll = 0f;
             }
