@@ -22,5 +22,7 @@ public class Boost : MonoBehaviour
         //Destroy boost
         //Increase Gliders speed by a small amount
         //Make particle explosion where boost used to be
+
+
     }
 }
