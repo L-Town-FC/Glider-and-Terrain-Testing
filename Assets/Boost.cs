@@ -6,6 +6,7 @@ public class Boost : MonoBehaviour
 {
     Vector3 initialPosition;
     float amplitude = 1f;
+    public ParticleSystem boostExplosion;
     private void Start()
     {
         initialPosition = transform.position;
@@ -23,6 +24,9 @@ public class Boost : MonoBehaviour
         //Increase Gliders speed by a small amount
         //Make particle explosion where boost used to be
 
+        Instantiate(boostExplosion,transform.position, Quaternion.identity);
+        print("BOOM");
+        Destroy(transform.gameObject);
 
     }
 }
