@@ -6,40 +6,65 @@ public class BoostExplosion : MonoBehaviour
 {
     ParticleSystem myParticleSystem;
     ParticleSystem.ColorOverLifetimeModule colorModule;
-    Gradient ourGradient;
+    ParticleSystem.TrailModule trailModule;
+    Gradient particleGradient;
+    Gradient trailGradient;
     float lifetime = 10f;
     Color startColor;
+    float alpha1 = 0.3f;
+    float alpha2 = 0.0f;
+
+    private void OnEnable()
+    {
+        //Need to apply these to trail color as well
+        // Get the system and the color module.
+        myParticleSystem = GetComponent<ParticleSystem>();
+        colorModule = myParticleSystem.colorOverLifetime;
+        trailModule = myParticleSystem.trails;
+
+        RandomColor();
+        ParticleGradient();
+        TrailGradient();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         Destroy(transform.gameObject, lifetime);
+    }
 
-        //Need to apply these to trail color as well
-        // Get the system and the color module.
-        myParticleSystem = GetComponent<ParticleSystem>();
-        colorModule = myParticleSystem.colorOverLifetime;
+    void ParticleGradient()
+    {
+        particleGradient = new Gradient();
+        particleGradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(startColor, 0.0f), new GradientColorKey(Color.white, 3.0f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(alpha1, 0.0f), new GradientAlphaKey(alpha2, 3.0f) }
+        );
 
+        // Apply the gradient.
+        colorModule.color = particleGradient;
+    }
+
+    void TrailGradient()
+    {
+        trailGradient = new Gradient();
+        trailGradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(startColor, 0.0f), new GradientColorKey(Color.black, 100f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(alpha1, 0.0f), new GradientAlphaKey(alpha2, 3.0f) }
+        );
+
+        trailModule.colorOverLifetime = trailGradient;
+        trailModule.colorOverTrail = trailGradient;
+    }
+
+    void RandomColor()
+    {
         startColor = new Color(
             Random.Range(0f, 1f),
             Random.Range(0f, 1f),
             Random.Range(0f, 1f)
         );
-
-        ParticleGradient();
-    }
-
-    void ParticleGradient()
-    {
-        float alpha = 1.0f;
-        ourGradient = new Gradient();
-        ourGradient.SetKeys(
-            new GradientColorKey[] { new GradientColorKey(startColor, 0.0f), new GradientColorKey(Color.white, 3.0f) },
-            new GradientAlphaKey[] { new GradientAlphaKey(alpha, 0.0f), new GradientAlphaKey(alpha - 0.5f, 3.0f) }
-        );
-
-        // Apply the gradient.
-        colorModule.color = ourGradient;
+        myParticleSystem.startColor = startColor;
     }
 
 }
