@@ -56,10 +56,11 @@
     <Analyzer Include="C:\Program Files (x86)\Microsoft Visual Studio Tools for Unity\16.0\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Updraft.cs" />
-    <Compile Include="Assets\BoostSpawner.cs" />
-    <Compile Include="Assets\GliderMovement.cs" />
-    <Compile Include="Assets\Boost.cs" />
+    <Compile Include="Assets\Scripts\Updraft.cs" />
+    <Compile Include="Assets\Scripts\Boost.cs" />
+    <Compile Include="Assets\Scripts\BoostSpawner.cs" />
+    <Compile Include="Assets\Scripts\GliderMovement.cs" />
+    <Compile Include="Assets\Scripts\BoostExplosion.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
