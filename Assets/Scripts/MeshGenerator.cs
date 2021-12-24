@@ -13,9 +13,28 @@ public class MeshGenerator : MonoBehaviour
     public int xSize = 20;
     public int zSize = 20;
 
+    [Range(0,0.1f)]
+    public float coarseScale1 = 10f;
+    [Range(0, 0.1f)]
+    public float coarseScale2 = 10f;
 
-    private void Start()
+    [Range(0,10)]
+    public float coarseRange = 2f;
+    
+    [Range(0,0.5f)]
+    public float fineScale1 = 1f;
+    [Range(0, 0.5f)]
+    public float fineScale2 = 1f;
+
+    [Range(0,2)]
+    public float fineRange = 0.5f;
+
+    public float xOffset;
+    public float yOffset;
+
+    public void GenerateMap() //function used by editor
     {
+       
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
 
@@ -23,9 +42,16 @@ public class MeshGenerator : MonoBehaviour
         UpdateMesh();
     }
 
-    private void Update()
-    {
-    }
+
+    //private void Start()
+    //{
+    //    mesh = new Mesh();
+    //    GetComponent<MeshFilter>().mesh = mesh;
+
+    //    CreateShape();
+    //    UpdateMesh();
+    //}
+
 
     void CreateShape()
     {
@@ -37,7 +63,14 @@ public class MeshGenerator : MonoBehaviour
         {
             for(int x = 0; x <= xSize; x++)
             {
-                float y = Mathf.PerlinNoise(x *0.3f, z * 0.3f) * 2f; //multiplying by 0.3 zooms out of noise and makes it smoother. Multiplying it by 2 increases the range of height values
+                //scales zoom the noise in and out/range increase max and min value of noise
+                float coarseY1 = Mathf.PerlinNoise(x * coarseScale1 + xOffset, z * coarseScale1 + yOffset) * coarseRange;
+                float coarseY2 = Mathf.PerlinNoise(x * coarseScale2 + xOffset, z * coarseScale2 + yOffset) * coarseRange;
+                float fineY1 = Mathf.PerlinNoise(x * fineScale1, z * fineScale1) * fineRange;
+                float fineY2 = Mathf.PerlinNoise(x * fineScale2, z * fineScale2) * fineRange;
+
+                float y = coarseY1 + coarseY2 + fineY1 + fineY2;
+
                 vertices[i] = new Vector3(x, y, z);
                 i++;
             }
@@ -68,18 +101,13 @@ public class MeshGenerator : MonoBehaviour
   
     }
 
-    void UpdateMesh()
+    void UpdateMesh() //makes sure mesh is set up correctly and points arent saved from previous mesh
     {
         mesh.Clear();
 
         mesh.vertices = vertices;
         mesh.triangles = triangles;
 
-        mesh.RecalculateNormals();
-    }
-
-    public void GenerateMap()
-    {
-
+        mesh.RecalculateNormals(); //fixes lighting of mesh based on surface normals
     }
 }

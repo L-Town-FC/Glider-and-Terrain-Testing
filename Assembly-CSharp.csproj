@@ -58,11 +58,10 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Updraft.cs" />
     <Compile Include="Assets\Scripts\Boost.cs" />
+    <Compile Include="Assets\Scripts\MeshGenerator.cs" />
     <Compile Include="Assets\Scripts\BoostExplosion.cs" />
     <Compile Include="Assets\Scripts\BoostSpawner.cs" />
     <Compile Include="Assets\Scripts\GliderMovement.cs" />
-    <Compile Include="Assets\Scripts\MeshGenerator.cs" />
-    <Compile Include="Assets\Scripts\MeshEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
