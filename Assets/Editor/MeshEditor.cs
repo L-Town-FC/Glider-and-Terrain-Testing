@@ -6,6 +6,7 @@ using UnityEditor;
 [CustomEditor(typeof(MeshGenerator))]
 public class MeshEditor : Editor
 {
+    public bool thisWorks;
     public override void OnInspectorGUI()
     {
         MeshGenerator meshGenerator = target as MeshGenerator;

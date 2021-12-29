@@ -5,41 +5,38 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class MeshGenerator : MonoBehaviour
 {
+
+    //do something like this to generate seed
+    static void asdf()
+    {
+        System.Random prng = new System.Random(1);
+    }
+
     Mesh mesh;
 
     Vector3[] vertices;
     int[] triangles;
     Color[] colors;
 
-    public int xSize = 20;
-    public int zSize = 20;
+    public int xSize = 100;
+    public int zSize = 100;
 
-    //[Range(0,0.1f)]
-    //public float coarseFrequency1 = 0f;
-    //[Range(0, 0.1f)]
-    //public float coarseFrequency2 = 0f;
-
-    //[Range(0,10)]
-    //public float coarseAmplitude = 2f;
-    
-    //[Range(0,1f)]
-    //public float fineFrequency1 = 1f;
-    //[Range(0, 1f)]
-    //public float fineFrequency2 = 1f;
-
-    //[Range(0,2)]
-    //public float fineAmplitude = 0.5f;
 
     [Range(0,10)]
     public float amplitude = 1f;
 
-    public float startingFrequency = 0.1f;
+    [Range(10,100)]
+    public float noiseScale = 10f;
     float frequency;
 
+    [Range(1,8)]
     public int octaves;
-    public float persistance;
+
     [Range(0,1)]
-    public float lacunarity;
+    public float persistance = 0.5f;
+
+    [Range(0,5)]
+    public float lacunarity = 2;
 
     public float xOffset;
     public float zOffset;
@@ -51,14 +48,14 @@ public class MeshGenerator : MonoBehaviour
 
     public void GenerateMap() //function used by editor
     {
-        frequency = startingFrequency;
+        frequency = 1/noiseScale;
         minTerrainHeight = 0;
         maxTerrainHeight = 0;
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
 
         CreateShape();
-        UpdateMesh();
+        UpdateMesh(mesh, vertices, triangles, colors);
     }
 
 
@@ -78,38 +75,32 @@ public class MeshGenerator : MonoBehaviour
 
 
         //creates a list of vertices for the specified length(xSize) and width(zSize)
-        for (int j = 0; j < octaves; j++)
-        {
+        
             for (int i = 0, z = 0; z <= zSize; z++)
             {
                 for (int x = 0; x <= xSize; x++)
-                {   
-                    float y = NoiseGenerator(x, z, j);
+                {
+                frequency = 1/noiseScale;
+                    
+                    for (int j = 0; j <= octaves; j++)
+                    {
+                        float y = NoiseGenerator(x, z);
 
-                    if(float.IsInfinity(y) == true)
-                    {
-                        print("Is Infinite");
-                    } 
-                    //if (y > maxTerrainHeight)
-                    //{
-                    //    maxTerrainHeight = y;
-                    //}
-                    //if (y < minTerrainHeight) {
-                    //    minTerrainHeight = y;
-                    //}
-
-                    if (vertices[i] == Vector3.zero)
-                    {
-                        vertices[i] = new Vector3(x, y, z);
+                        if (vertices[i] == Vector3.zero)
+                        {
+                            vertices[i] = new Vector3(x, y, z);
+                        }
+                        else
+                        {
+                            vertices[i] += new Vector3(0, y, 0);
+                        }
+                    
                     }
-                    else
-                    {
-                        vertices[i] += new Vector3(0, y, 0);
-                    }
-                    i++;
+                i++;
                 }
             }
-        }
+
+        maxTerrainHeight = minTerrainHeight = vertices[0].y; //setting min/max height values to arbitrary point in set of vertices to ensure that all heights will be compared from a known point in the set
 
         for (int i = 0; i < vertices.Length; i++)
         {
@@ -124,8 +115,6 @@ public class MeshGenerator : MonoBehaviour
                 minTerrainHeight = y;
             }
         }
-
-        print(new Vector2(minTerrainHeight, maxTerrainHeight));
 
         TrianglesAndVertices();
 
@@ -143,7 +132,7 @@ public class MeshGenerator : MonoBehaviour
 
     }
 
-    void UpdateMesh() //makes sure mesh is set up correctly and points arent saved from previous mesh
+    static void UpdateMesh(Mesh mesh, Vector3[] vertices, int[] triangles, Color[] colors) //makes sure mesh is set up correctly and points arent saved from previous mesh
     {
         mesh.Clear();
 
@@ -154,16 +143,13 @@ public class MeshGenerator : MonoBehaviour
         mesh.RecalculateNormals(); //fixes lighting of mesh based on surface normals
     }
 
-    float NoiseGenerator(float x, float z, int octave)
+    float NoiseGenerator(float x, float z)
     {
-        frequency = startingFrequency;
-        frequency *= lacunarity * octave;
-
         //Frequencys zoom the noise in and out/Amplitude increase max and min value of noise
         float perlinValue = Mathf.PerlinNoise((float)x * frequency + xOffset, (float)z * frequency + zOffset);
         float noiseHeight = perlinValue * amplitude;
-        noiseHeight *= persistance * octave;
-        //frequency *= lacunarity * octave;
+        noiseHeight *= persistance;
+        frequency *= lacunarity;
 
         return noiseHeight;
     }
