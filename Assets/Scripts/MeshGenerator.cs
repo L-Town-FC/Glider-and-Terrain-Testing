@@ -5,13 +5,6 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class MeshGenerator : MonoBehaviour
 {
-
-    //do something like this to generate seed
-    static void asdf()
-    {
-        System.Random prng = new System.Random(1);
-    }
-
     Mesh mesh;
 
     Vector3[] vertices;
@@ -21,6 +14,7 @@ public class MeshGenerator : MonoBehaviour
     public int xSize = 100;
     public int zSize = 100;
 
+    public int seed;
 
     [Range(0,10)]
     public float amplitude = 1f;
@@ -30,7 +24,7 @@ public class MeshGenerator : MonoBehaviour
     float frequency;
 
     [Range(1,8)]
-    public int octaves;
+    public int octaves; //number of times height is sampled at a point
 
     [Range(0,1)]
     public float persistance = 0.5f;
@@ -38,8 +32,8 @@ public class MeshGenerator : MonoBehaviour
     [Range(0,5)]
     public float lacunarity = 2;
 
-    public float xOffset;
-    public float zOffset;
+    Vector2[] octaveOffsets;
+    public Vector2 offset;
 
     public Gradient gradient;
 
@@ -53,7 +47,8 @@ public class MeshGenerator : MonoBehaviour
         maxTerrainHeight = 0;
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
-
+        octaveOffsets = SeedGenerator(seed, octaves);
+        print(octaveOffsets);
         CreateShape();
         UpdateMesh(mesh, vertices, triangles, colors);
     }
@@ -73,18 +68,16 @@ public class MeshGenerator : MonoBehaviour
     {
         vertices = new Vector3[(xSize + 1) * (zSize + 1)];
 
-
         //creates a list of vertices for the specified length(xSize) and width(zSize)
-        
             for (int i = 0, z = 0; z <= zSize; z++)
             {
                 for (int x = 0; x <= xSize; x++)
                 {
                 frequency = 1/noiseScale;
                     
-                    for (int j = 0; j <= octaves; j++)
+                    for (int j = 0; j < octaves; j++)
                     {
-                        float y = NoiseGenerator(x, z);
+                        float y = NoiseGenerator(x, z, j);
 
                         if (vertices[i] == Vector3.zero)
                         {
@@ -143,13 +136,16 @@ public class MeshGenerator : MonoBehaviour
         mesh.RecalculateNormals(); //fixes lighting of mesh based on surface normals
     }
 
-    float NoiseGenerator(float x, float z)
+    float NoiseGenerator(float x, float z, int octave)
     {
         //Frequencys zoom the noise in and out/Amplitude increase max and min value of noise
-        float perlinValue = Mathf.PerlinNoise((float)x * frequency + xOffset, (float)z * frequency + zOffset);
+        //offset.x/offset.y are how to manually scroll vertically and horizontally on the noise
+        //octave offsets are generated based on the seed
+        //x - xsize/2 and z-zsize/2 make it so when you zoom in on the noise you zoom in on the center of the mesh instead of a corner
+        float perlinValue = Mathf.PerlinNoise( (float)(x - xSize/2) * frequency + offset.x + octaveOffsets[octave].x, (float)(z  - zSize/2) * frequency + offset.y + octaveOffsets[octave].y);
         float noiseHeight = perlinValue * amplitude;
-        noiseHeight *= persistance;
-        frequency *= lacunarity;
+        noiseHeight *= persistance; //octaves gradually have less and less effect on the overall terrain height
+        frequency *= lacunarity; //the sampled points gradually move in/out based on lacurnity and number of octaves
 
         return noiseHeight;
     }
@@ -179,5 +175,20 @@ public class MeshGenerator : MonoBehaviour
 
             vert++; //need to increment when a row is done or else a triangle is created between end of row and start of new row
         }
+    }
+
+    static Vector2[] SeedGenerator(int seed, int octaves)
+    {
+        System.Random prng = new System.Random(seed);
+        Vector2[] octaveOffsets = new Vector2[octaves];
+
+        for(int i = 0; i < octaves; i++)
+        {
+            float offsetX = prng.Next(-100000, 100000);
+            float offsetY = prng.Next(-100000, 100000);
+            octaveOffsets[i] = new Vector2(offsetX, offsetY);
+        }
+
+        return octaveOffsets;
     }
 }
