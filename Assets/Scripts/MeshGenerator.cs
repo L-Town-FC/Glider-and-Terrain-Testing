@@ -16,20 +16,20 @@ public class MeshGenerator : MonoBehaviour
 
     public int seed;
 
-    [Range(0,10)]
+    [Range(0, 10)]
     public float amplitude = 1f;
 
-    [Range(10,100)]
+    [Range(10, 300)]
     public float noiseScale = 10f;
     float frequency;
 
-    [Range(1,8)]
+    [Range(1, 8)]
     public int octaves; //number of times height is sampled at a point
 
-    [Range(0,1)]
+    [Range(0, 1)]
     public float persistance = 0.5f;
 
-    [Range(0,5)]
+    [Range(0, 5)]
     public float lacunarity = 2;
 
     Vector2[] octaveOffsets;
@@ -39,6 +39,10 @@ public class MeshGenerator : MonoBehaviour
 
     float minTerrainHeight;
     float maxTerrainHeight;
+    public enum ColorMode {NoColor, Color}; //determines how you want to color terrain
+    public ColorMode colormode;
+
+    public TerrainType[] regions;
 
     public void GenerateMap() //function used by editor
     {
@@ -51,6 +55,7 @@ public class MeshGenerator : MonoBehaviour
         print(octaveOffsets);
         CreateShape();
         UpdateMesh(mesh, vertices, triangles, colors);
+        
     }
 
 
@@ -118,7 +123,21 @@ public class MeshGenerator : MonoBehaviour
             for (int x = 0; x <= xSize; x++)
             {
                 float height = Mathf.InverseLerp(minTerrainHeight, maxTerrainHeight,vertices[i].y); //normalizes height value  between 0 and 1 so color gradient works properly
-                colors[i] = gradient.Evaluate(height);
+                if(colormode == ColorMode.NoColor)
+                {
+                    colors[i] = gradient.Evaluate(height);
+                }
+                else
+                {
+                    for(int j = 0; j < regions.Length; j++)
+                    {
+                        if(height <= regions[j].height) //checks if below a threshold height for a region. If higher than that height, check the next region
+                        {
+                            colors[i] = regions[j].color;
+                            break;
+                        }
+                    }
+                }
                 i++;
             }
         }
@@ -190,5 +209,13 @@ public class MeshGenerator : MonoBehaviour
         }
 
         return octaveOffsets;
+    }
+
+    [System.Serializable]
+    public struct TerrainType //struct for creating regions beased on height
+    {
+        public string name;
+        public Color color;
+        public float height;
     }
 }
